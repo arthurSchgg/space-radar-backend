@@ -39,19 +39,6 @@ public class ApproachService {
     }
 
     @Transactional(readOnly = true)
-    public void importFromNasa(LocalDate startDate, LocalDate endDate) {
-        NasaFeedResponseDTO responseDTO = nasaClient.searchAsteroids(startDate, endDate);
-
-        for(List<AsteroidRequestNasaDTO> asteroids : responseDTO.getNearEarthObjects().values()){
-
-            for(AsteroidRequestNasaDTO dto : asteroids) {
-                Asteroid asteroid = asteroidMapper.toEntity(dto);
-                asteroidRepository.save(asteroid);
-            }
-        }
-    }
-
-    @Transactional(readOnly = true)
     public List<CloseApproach> findAllApproaches() {
         return closeApproachRepository.findAll();
     }
