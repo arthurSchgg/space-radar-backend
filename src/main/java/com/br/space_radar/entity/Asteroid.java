@@ -33,7 +33,7 @@ public class Asteroid {
     private Double minDiameterM;
 
     @Column(name = "max_diameter_m")
-    private Double mazDiameterM;
+    private Double maxDiameterM;
 
     @Column(name = "dangerous", nullable = false)
     private boolean dangerous;
