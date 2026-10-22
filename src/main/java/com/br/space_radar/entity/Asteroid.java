@@ -14,7 +14,7 @@ import java.util.UUID;
 @Table(name = "tb_asteroid")
 public class Asteroid {
 
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
