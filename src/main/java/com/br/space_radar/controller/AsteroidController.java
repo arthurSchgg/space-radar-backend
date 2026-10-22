@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -29,6 +30,14 @@ public class AsteroidController {
             @PathVariable Long nasaId
     ) {
         return ResponseEntity.ok(service.searchAsteroid(nasaId));
+    }
+
+    @PostMapping("/import")
+    public ResponseEntity<Void> importFromNasa(@RequestParam LocalDate startDate, @RequestParam LocalDate endDate){
+
+        service.importFromNasa(startDate, endDate);
+
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{nasaId}")

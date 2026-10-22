@@ -1,8 +1,8 @@
 package com.br.space_radar.service;
 
 import com.br.space_radar.client.NasaClient;
-import com.br.space_radar.dto.nasa.AsteroidRequestNasaDTO;
-import com.br.space_radar.dto.nasa.NasaFeedResponseDTO;
+import com.br.space_radar.dto.AsteroidRequestNasaDTO;
+import com.br.space_radar.dto.NasaFeedResponseDTO;
 import com.br.space_radar.mapper.AsteroidMapper;
 import com.br.space_radar.entity.Asteroid;
 import com.br.space_radar.repository.AsteroidRepository;
