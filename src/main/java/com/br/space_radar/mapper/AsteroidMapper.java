@@ -1,6 +1,6 @@
 package com.br.space_radar.mapper;
 
-import com.br.space_radar.dto.nasa.AsteroidRequestNasaDTO;
+import com.br.space_radar.dto.AsteroidRequestNasaDTO;
 import com.br.space_radar.entity.Asteroid;
 import org.springframework.stereotype.Component;
 
