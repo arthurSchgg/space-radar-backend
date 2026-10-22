@@ -1,12 +1,15 @@
 package com.br.space_radar.service;
 
+import com.br.space_radar.client.NasaClient;
 import com.br.space_radar.dto.nasa.AsteroidRequestNasaDTO;
+import com.br.space_radar.dto.nasa.NasaFeedResponseDTO;
 import com.br.space_radar.mapper.AsteroidMapper;
 import com.br.space_radar.entity.Asteroid;
 import com.br.space_radar.repository.AsteroidRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -14,10 +17,12 @@ public class AsteroidService {
 
     private final AsteroidRepository asteroidRepository;
     private final AsteroidMapper asteroidMapper;
+    private final NasaClient nasaClient;
 
-    public AsteroidService(AsteroidRepository asteroidRepository, AsteroidMapper asteroidMapper) {
+    public AsteroidService(AsteroidRepository asteroidRepository, AsteroidMapper asteroidMapper, NasaClient nasaClient) {
         this.asteroidRepository = asteroidRepository;
         this.asteroidMapper = asteroidMapper;
+        this.nasaClient = nasaClient;
     }
 
     @Transactional(readOnly = true)
@@ -31,6 +36,21 @@ public class AsteroidService {
     @Transactional(readOnly = true)
     public List<Asteroid> findAllAsteroids(){
         return asteroidRepository.findAll();
+    }
+
+    @Transactional
+    public void importFromNasa(LocalDate startDate, LocalDate endDate) {
+        NasaFeedResponseDTO response =
+                nasaClient.searchAsteroids(startDate, endDate);
+
+        for (List<AsteroidRequestNasaDTO> asteroids :
+                response.getNearEarthObjects().values()) {
+
+            for (AsteroidRequestNasaDTO dto : asteroids) {
+                Asteroid asteroid = asteroidMapper.toEntity(dto);
+                asteroidRepository.save(asteroid);
+            }
+        }
     }
 
     @Transactional
