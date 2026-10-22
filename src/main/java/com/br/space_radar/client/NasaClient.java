@@ -1,6 +1,6 @@
 package com.br.space_radar.client;
 
-import com.br.space_radar.dto.nasa.NasaFeedResponseDTO;
+import com.br.space_radar.dto.NasaFeedResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;

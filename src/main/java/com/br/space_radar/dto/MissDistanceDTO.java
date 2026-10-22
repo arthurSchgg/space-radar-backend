@@ -1,4 +1,4 @@
-package com.br.space_radar.dto.nasa;
+package com.br.space_radar.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
