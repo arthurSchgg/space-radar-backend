@@ -3,6 +3,7 @@ package com.br.space_radar.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -19,20 +20,23 @@ public class Asteroid {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "nada_id", nullable = false, unique = true)
+    @Column(name = "nasa_id", nullable = false, unique = true)
     private Long nasaId;
 
-    @Column(name = "nome", nullable = false, length = 255)
-    private String nome;
+    @OneToMany(mappedBy = "asteroid")
+    private List<CloseApproach> closeApproaches;
 
-    @Column(name = "diametro_min_m")
-    private Double diametroMinM;
+    @Column(name = "name", nullable = false, length = 255)
+    private String name;
 
-    @Column(name = "diametro_max_m")
-    private Double diametroMaxM;
+    @Column(name = "min_diameter_m")
+    private Double minDiameterM;
 
-    @Column(name = "perigoso", nullable = false)
-    private boolean perigoso;
+    @Column(name = "max_diameter_m")
+    private Double mazDiameterM;
+
+    @Column(name = "dangerous", nullable = false)
+    private boolean dangerous;
 
     @Column(name = "url_jpl", length = 500)
     private String urlJpl;
