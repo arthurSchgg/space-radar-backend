@@ -1,5 +1,6 @@
 package com.br.space_radar.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +24,8 @@ public class Asteroid {
     @Column(name = "nasa_id", nullable = false, unique = true)
     private Long nasaId;
 
-    @OneToMany(mappedBy = "asteroid")
+    @JsonIgnore
+    @OneToMany(mappedBy = "asteroid", fetch = FetchType.LAZY)
     private List<CloseApproach> closeApproaches;
 
     @Column(name = "name", nullable = false, length = 255)
