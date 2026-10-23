@@ -12,4 +12,6 @@ public interface CloseApproachRepository extends JpaRepository<CloseApproach, UU
     List<CloseApproach> findByAsteroidId(UUID asteroidId);
 
     List<CloseApproach> findByDateBetween(LocalDateTime startDate, LocalDateTime endDate);
+
+    boolean existsByAsteroidIdAndDate(UUID asteroid, LocalDateTime date);
 }
