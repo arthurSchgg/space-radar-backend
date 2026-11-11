@@ -3,6 +3,7 @@ package com.br.space_radar.service;
 import com.br.space_radar.dto.ImportSummaryDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -24,6 +25,7 @@ public class NasaImportScheduler {
     private final Clock clock;
     private final AtomicBoolean running = new AtomicBoolean(false);
 
+    @Autowired
     public NasaImportScheduler(AsteroidService service,
         @Value("${radar.sync.on-startup:false}") boolean syncOnStartup) {
         this(service, syncOnStartup, Clock.systemUTC());
