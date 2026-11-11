@@ -40,7 +40,7 @@ Para rodar **somente a API** localmente com JDK 21, inicialize um PostgreSQL pr�
 ./mvnw spring-boot:run
 ```
 
-Sem Docker, a API usa por padrão a porta `8080`. Execute `./mvnw test` para os testes automatizados.
+Sem Docker, a API usa por padrão a porta `8080`. Execute `./mvnw test` para os testes unitários. Os testes de integração com PostgreSQL executam no CI com `DB_INTEGRATION_TEST=true` e um banco temporário; para rodar localmente, configure um PostgreSQL de testes separado.
 
 ## Endpoints
 
@@ -109,6 +109,24 @@ curl -X POST 'http://localhost:8181/v1/admin/import?startDate=2026-11-11&endDate
 A resposta informa `asteroidsCreated`, `asteroidsUpdated`, `approachesCreated` e `approachesUpdated`. Repetir o mesmo período atualiza os registros; o índice único protege contra duplicidade de aproximações por asteroide + data/hora.
 
 **Atenção:** o radar consulta **apenas os períodos importados para o banco**. Uma consulta de data não importada retorna uma página vazia; não dispara importação automática.
+
+## Sincronização automática opcional
+
+Para não depender apenas de importações manuais, habilite as variáveis abaixo no Web Service do backend. A configuração é **desativada por padrão** e nunca executa sincronização sem ativação explícita:
+
+```dotenv
+RADAR_SYNC_ENABLED=true
+RADAR_SYNC_ON_STARTUP=true
+# opcional: 03:15 UTC todos os dias (cron Spring de seis campos)
+RADAR_SYNC_CRON=0 15 3 * * *
+```
+
+- Busca eventos de **hoje até seis dias adiante**, em UTC; o período está dentro do limite NASA.
+- Em cada execução, atualiza asteroides e eventos já existentes, evitando duplicatas.
+- `RADAR_SYNC_ON_STARTUP=true` ativa uma carga inicial na inicialização, em vez de esperar pelo horário diário.
+- Em caso de erro externo, registra uma advertência sem divulgar URL com API key e mantém a aplicação online; tenta novamente na próxima execução programada.
+- Utilize sua própria `NASA_API_KEY`, respeite a cota do serviço e acompanhe os logs; o `DEMO_KEY` é destinado a testes com limites mais baixos.
+- A sincronização **não** fornece coordenadas espaciais reais nem garante monitoramento em tempo real. Eventos fora dos períodos importados continuam exigindo importação adicional.
 
 ## Integração com o frontend
 
