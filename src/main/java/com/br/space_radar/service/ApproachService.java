@@ -1,58 +1,38 @@
-
 package com.br.space_radar.service;
 
-import com.br.space_radar.entity.CloseApproach;
+import com.br.space_radar.dto.ApproachResponseDTO;
+import com.br.space_radar.dto.PageResponseDTO;
 import com.br.space_radar.repository.CloseApproachRepository;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.UUID;
 
 @Service
 public class ApproachService {
+    private final CloseApproachRepository repository;
 
-    private final CloseApproachRepository closeApproachRepository;
-
-    public ApproachService(CloseApproachRepository closeApproachRepository) {
-        this.closeApproachRepository = closeApproachRepository;
+    public ApproachService(CloseApproachRepository repository) {
+        this.repository = repository;
     }
 
     @Transactional(readOnly = true)
-    public Optional<CloseApproach> searchApproach(UUID id) {
-        return closeApproachRepository.findById(id);
+    public ApproachResponseDTO searchApproach(UUID id) {
+        return repository.findById(id).map(ApproachResponseDTO::from)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Close approach not found"));
     }
 
     @Transactional(readOnly = true)
-    public List<CloseApproach> findAllApproaches() {
-        return closeApproachRepository.findAllWithAsteroid();
+    public PageResponseDTO<ApproachResponseDTO> findAllApproaches(Pageable pageable) {
+        return PageResponseDTO.from(repository.findAllWithAsteroid(pageable), ApproachResponseDTO::from);
     }
 
     @Transactional(readOnly = true)
-    public List<CloseApproach> findApproachesByAsteroid(UUID asteroidId) {
-        return closeApproachRepository.findByAsteroidId(asteroidId);
-    }
-
-    @Transactional(readOnly = true)
-    public List<CloseApproach> findApproachesByDateRange(
-            LocalDateTime start, LocalDateTime end) {
-        return closeApproachRepository.findByDateBetween(start, end);
-    }
-
-    @Transactional
-    public CloseApproach saveApproach(CloseApproach approach) {
-        return closeApproachRepository.save(approach);
-    }
-
-    @Transactional
-    public void deleteApproach(UUID id) {
-        CloseApproach approach = closeApproachRepository.findById(id)
-                .orElseThrow(() ->
-                        new RuntimeException("Approach not found with id: " + id)
-                );
-
-        closeApproachRepository.delete(approach);
+    public PageResponseDTO<ApproachResponseDTO> findApproachesByAsteroid(UUID asteroidId, Pageable pageable) {
+        return PageResponseDTO.from(repository.findByAsteroidId(asteroidId, pageable), ApproachResponseDTO::from);
     }
 }
+
