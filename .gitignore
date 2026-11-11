@@ -41,3 +41,6 @@ target/
 
 # IDE
 .idea/
+# Allow a safe public template without credentials
+!.env.example
+
