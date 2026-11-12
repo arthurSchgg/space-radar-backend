@@ -1,0 +1,47 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Java 21 & PostgreSQL integration
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: space_radar
+          POSTGRES_USER: space_radar
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U space_radar -d space_radar"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: space_radar
+      DB_USERNAME: space_radar
+      DB_PASSWORD: ci-only-password
+      NASA_API_KEY: DEMO_KEY
+      RADAR_ADMIN_TOKEN: ci-only-admin-token
+      DB_INTEGRATION_TEST: "true"
+      RADAR_SYNC_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Compile, unit tests and PostgreSQL/Flyway integration tests
+        run: mvn --batch-mode --no-transfer-progress verify

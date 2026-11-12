@@ -1,13 +1,14 @@
 package com.br.space_radar;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
+// The Spring context requires PostgreSQL; unit tests must run without external services.
 class SpaceRadarApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
+    @Test
+    void applicationClassExists() {
+        assertTrue(SpaceRadarApplication.class.isAnnotationPresent(
+                org.springframework.boot.autoconfigure.SpringBootApplication.class));
+    }
 }
+

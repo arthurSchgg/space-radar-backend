@@ -31,3 +31,16 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Credenciais
+.env
+.env.*
+
+# Build
+target/
+
+# IDE
+.idea/
+# Allow a safe public template without credentials
+!.env.example
+
