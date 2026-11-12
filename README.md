@@ -32,7 +32,7 @@ Todos os endpoints públicos de leitura entregam **DTOs**, não entidades JPA. A
 docker compose --env-file .env -f docker/docker-compose.yml up --build -d
 ```
 
-API: `http://localhost:8181`. Saúde: `http://localhost:8181/actuator/health`. O PostgreSQL fica interno à rede Docker; nenhuma porta do banco é publicada no host.
+API Docker: `http://localhost:8181`. Saúde: `http://localhost:8181/actuator/health`. O app dentro do Docker escuta em `8888` (mapeamento `8181:8888`); PostgreSQL usa `5432` internamente e está publicado **somente no loopback do host** como `127.0.0.1:5433` para integração com o IntelliJ.
 
 Para rodar **somente a API** localmente com JDK 21, inicialize um PostgreSQL próprio e forneça as variáveis `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `NASA_API_KEY` e `RADAR_ADMIN_TOKEN` ao processo:
 
@@ -40,7 +40,7 @@ Para rodar **somente a API** localmente com JDK 21, inicialize um PostgreSQL pr�
 ./mvnw spring-boot:run
 ```
 
-Sem Docker, a API usa por padrão a porta `8080`. Execute `./mvnw test` para os testes unitários. Os testes de integração com PostgreSQL executam no CI com `DB_INTEGRATION_TEST=true` e um banco temporário; para rodar localmente, configure um PostgreSQL de testes separado.
+Executando a aplicação **pelo IntelliJ/terminal fora do Docker**, a API usa por padrão a porta `8484`. Como o PostgreSQL do Compose é publicado em `127.0.0.1:5433`, configure `DB_HOST=localhost`, `DB_PORT=5433` e os demais `DB_*` na configuração de execução do IntelliJ. As variáveis do `.env` do Compose **não são carregadas automaticamente** pelo IntelliJ. Para não iniciar duas APIs durante a depuração, execute `docker compose --env-file .env -f docker/docker-compose.yml stop app` e mantenha o serviço `postgres` ativo. Execute `./mvnw test` para os testes unitários. Os testes de integração com PostgreSQL executam no CI com `DB_INTEGRATION_TEST=true` e um banco temporário; para rodar localmente, configure um PostgreSQL de testes separado.
 
 ## Endpoints
 
@@ -139,7 +139,11 @@ O frontend está no repositório [space-radar-frotend](https://github.com/arthur
 - `.env` e segredos locais são ignorados pelo Git, mas um `.env` **foi versionado anteriormente na `develop`**. Removê-lo da versão atual **não apaga o histórico**. **Rotacione todas as credenciais que já estiveram nele**, incluindo chave NASA, senha do banco e qualquer token, antes de publicar.
 - Migrações em `src/main/resources/db/migration`. Um banco antigo criado com Hibernate pode conter diferenças/duplicidades: **faça backup e valide V2** antes de migrar; `baseline-on-migrate` não corrige schema antigo automaticamente.
 - A importação usa token administrativo fixo. Para exposição pública séria, recomenda-se reforçar autenticação, limite de requisições e observabilidade; a proteção atual é mínima.
-- Para o backend no Render, use serviço **Web Service** com Docker e PostgreSQL. Defina `DB_*`, `NASA_API_KEY`, `RADAR_ADMIN_TOKEN` e `RADAR_CORS_ORIGINS` no painel de variáveis de ambiente, nunca no repositório.
+- Para publicar o backend no Render, crie um **Web Service** com runtime **Docker**, repositório `space-radar-backend`, branch `main`, contexto de build na raiz do repositório e Dockerfile em `docker/Dockerfile`. Adicione um PostgreSQL persistente **do Render** e configure `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME` e `DB_PASSWORD` a partir das informações de conexão **interna** do banco hospedado (não use `localhost` nem portas de exposição do Docker Desktop). Não use Docker Compose para provisionar a aplicação no Render.
+
+Configure `NASA_API_KEY`, `RADAR_ADMIN_TOKEN` e `RADAR_CORS_ORIGINS=https://seu-projeto.vercel.app` como variáveis **privadas** do Render; para mais de um domínio, separe as origens com vírgulas. Para importar automaticamente a semana atual ao iniciar, use `RADAR_SYNC_ENABLED=true` e `RADAR_SYNC_ON_STARTUP=true`, com chave NASA válida e atenção às cotas. O Spring usa `PORT` (se o Render definir) com prioridade sobre `SERVER_PORT`, de modo que não é necessário fixar a porta do container de desenvolvimento. Depois confirme `/actuator/health` e `/v1/radar` na URL HTTPS pública.
+
+No deploy da Vercel, defina `SPACE_RADAR_API_URL` **apenas** com a origem HTTPS pública deste serviço. Esta variável no frontend **não é secreta**. Nunca envie os valores de `NASA_API_KEY`, `DB_PASSWORD` ou `RADAR_ADMIN_TOKEN` para Vercel ou GitHub.
 - Endpoint de health: `/actuator/health`.
 - Os testes/CI devem passar antes de fazer merge `feature/* → develop → main`.
 
