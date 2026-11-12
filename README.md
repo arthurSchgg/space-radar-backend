@@ -7,7 +7,7 @@ API REST para explorar **asteroides próximos da Terra (Near-Earth Objects, NEOs
 ## Tecnologias
 
 - Java 21, Spring Boot 4.1.1, Spring Web MVC, RestClient, Spring Data JPA
-- PostgreSQL 17 e migrações Flyway
+- PostgreSQL 17 hospedado no **Neon** (produção), PostgreSQL local via Docker Compose e migrações Flyway
 - Maven, Docker Compose e GitHub Actions
 - NASA NeoWs como fonte externa de informações
 
@@ -139,7 +139,7 @@ O frontend está no repositório [space-radar-frotend](https://github.com/arthur
 - `.env` e segredos locais são ignorados pelo Git, mas um `.env` **foi versionado anteriormente na `develop`**. Removê-lo da versão atual **não apaga o histórico**. **Rotacione todas as credenciais que já estiveram nele**, incluindo chave NASA, senha do banco e qualquer token, antes de publicar.
 - Migrações em `src/main/resources/db/migration`. Um banco antigo criado com Hibernate pode conter diferenças/duplicidades: **faça backup e valide V2** antes de migrar; `baseline-on-migrate` não corrige schema antigo automaticamente.
 - A importação usa token administrativo fixo. Para exposição pública séria, recomenda-se reforçar autenticação, limite de requisições e observabilidade; a proteção atual é mínima.
-- Para publicar o backend no Render, crie um **Web Service** com runtime **Docker**, repositório `space-radar-backend`, branch `main`, contexto de build na raiz do repositório e Dockerfile em `docker/Dockerfile`. Adicione um PostgreSQL persistente **do Render** e configure `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME` e `DB_PASSWORD` a partir das informações de conexão **interna** do banco hospedado (não use `localhost` nem portas de exposição do Docker Desktop). Não use Docker Compose para provisionar a aplicação no Render.
+- Para publicar o backend no Render, crie um **Web Service** com runtime **Docker**, repositório `space-radar-backend`, branch `main`, contexto de build na raiz do repositório e Dockerfile em `docker/Dockerfile`. O banco PostgreSQL de produção está hospedado no **[Neon](https://neon.tech/)**, enquanto a API Spring Boot utiliza o Render. No Web Service, configure `SPRING_DATASOURCE_URL` com o endereço **JDBC da conexão direta** fornecido pelo Neon (prefixo `jdbc:postgresql://`, nome do banco `space_radar` e `sslmode=require`), além de `DB_USERNAME` e `DB_PASSWORD` nas variáveis de ambiente privadas. O Flyway aplica as migrações ao iniciar. Não use `localhost`, não inclua credenciais no repositório e não use Docker Compose para provisionar o serviço no Render.
 
 Configure `NASA_API_KEY`, `RADAR_ADMIN_TOKEN` e `RADAR_CORS_ORIGINS=https://seu-projeto.vercel.app` como variáveis **privadas** do Render; para mais de um domínio, separe as origens com vírgulas. Para importar automaticamente a semana atual ao iniciar, use `RADAR_SYNC_ENABLED=true` e `RADAR_SYNC_ON_STARTUP=true`, com chave NASA válida e atenção às cotas. O Spring usa `PORT` (se o Render definir) com prioridade sobre `SERVER_PORT`, de modo que não é necessário fixar a porta do container de desenvolvimento. Depois confirme `/actuator/health` e `/v1/radar` na URL HTTPS pública.
 
